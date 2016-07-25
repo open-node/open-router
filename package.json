@@ -1,0 +1,29 @@
+{
+  "name": "open-router",
+  "version": "0.1.0",
+  "description": "restify router",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/open-node/open-router.git"
+  },
+  "keywords": [
+    "rest",
+    "router",
+    "resitfy",
+    "open-rest"
+  ],
+  "author": "Redstone Zhao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/open-node/open-router/issues"
+  },
+  "homepage": "https://github.com/open-node/open-router#readme",
+  "dependencies": {
+    "async": "^2.0.1",
+    "underscore": "^1.8.3"
+  }
+}
