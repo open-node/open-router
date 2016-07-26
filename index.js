@@ -1,6 +1,6 @@
 var _     = require('underscore')
   , async = require('async')
-  , ucwords = function(str) {
+  , ucwords = function(value) {
     if (!_.isString(value)) return value;
     return value[0].toUpperCase() + value.substring(1);
   }
@@ -62,7 +62,7 @@ module.exports = function(server, ctls, defaults, opts = {}) {
 
     var ctl = ctlAct.split('#')[0];
     var action = ctlAct.split('#')[1];
-    var evtName = ctl + ' ' + action;
+    var evtName = ctl + '_' + action;
     var actions;
 
     /** 如果定义的对应的控制器，也有对应的方法则使用该方法 */
@@ -123,7 +123,7 @@ module.exports = function(server, ctls, defaults, opts = {}) {
       register('get', routePath, controller + '#' + res + 's');
       register('post', routePath, controller + '#add' + ucwords(res));
     } else {
-      register('get', routePath, res + '#' + list);
+      register('get', routePath, res + '#list');
       register('post', routePath, res + '#add');
     }
   };
