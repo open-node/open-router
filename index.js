@@ -13,7 +13,8 @@ var _     = require('underscore')
  *  controller ./controller
  *  defaults 默认控制器方法
  */
-module.exports = function(server, ctls, defaults, opts = {}) {
+module.exports = function(server, ctls, defaults, opts) {
+  if (opts == null) opts = {};
   var apis = [];
 
   /** 判断是否需要提供apis的查询接口 */
