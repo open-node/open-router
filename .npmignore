@@ -12,3 +12,7 @@ samples
 build
 *~
 npm-debug.log
+test
+test/*
+coverage
+coverage/*

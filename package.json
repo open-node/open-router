@@ -1,10 +1,10 @@
 {
   "name": "open-router",
-  "version": "0.1.2",
+  "version": "0.1.5",
   "description": "restify router",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,13 @@
   "homepage": "https://github.com/open-node/open-router#readme",
   "dependencies": {
     "async": "^2.0.1",
+    "func-delegate": "^0.2.1",
+    "restify": "^4.1.1",
     "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "codecov": "^1.0.1",
+    "istanbul": "^0.4.4",
+    "mocha": "^3.0.2"
   }
 }
