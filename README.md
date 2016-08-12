@@ -38,6 +38,14 @@ var Router = require('open-router');
  */
 var router = Router(server, controllers, defaultCtl, opts);
 
+//or chainning call, without argument order
+// var router = Router
+//                .server(server)
+//                .ctls(controllers)
+//                .defaults(defaultCtl)
+//                .opts(opts)
+//                .exec()
+
 ```
 
 ## Methods
