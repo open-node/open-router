@@ -11,13 +11,12 @@ var ctls = {
   list: noop,
   detail: noop,
   modify: noop,
-  remove: noop,
+  remove: [noop, noop, noop],
   add: noop
 };
 
 var server = restify.createServer();
-
-server.get = function(path) {
+var checker = function(path) {
   var methods = [].slice.call(arguments, 1);
   it("path is string", function(done) {
     assert.ok(_.isString(path))
@@ -31,11 +30,32 @@ server.get = function(path) {
   });
 };
 
+server.get = checker;
+server.put = checker;
+server.patch = checker;
+server.del = checker;
+server.post = checker;
+
 var router = Router(server, {user: ctls});
 
 describe("Router normal", function() {
   describe("get", function() {
     router.get('/users', "user#list");
   });
-});
 
+  describe("put", function() {
+    router.put('/users/:id', "user#modify");
+  });
+
+  describe("patch", function() {
+    router.patch('/users/:id', "user#modify");
+  });
+
+  describe("post", function() {
+    router.post('/users', "user#add");
+  });
+
+  describe("del", function() {
+    router.del('/users/:id', "user#remove");
+  });
+});
