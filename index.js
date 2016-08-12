@@ -22,7 +22,14 @@ module.exports = delegate(Router, [{
           if (!_.isString(name)) throw Error('Argument `ctls` validate error, controller name must be a string');
           if (_.isArray(methods)) {
             _.each(methods, function(method) {
-              if (!_.isFunction(method)) throw Error('Argument `ctls` validate error, controller method must be an Array or a Function');
+              // logic or
+              if (_.isArray(method)) {
+                _.each(method, function(_or) {
+                  if (!_.isFunction(_or)) throw Error('Argument `ctls` validate error, controller method must be an Array or a Function');
+                });
+              } else {
+                if (!_.isFunction(method)) throw Error('Argument `ctls` validate error, controller method must be an Array or a Function');
+              }
             });
           } else {
             if (!_.isFunction(methods)) throw Error('Argument `ctls` validate error, controller method must be an Array or a Function');

@@ -11,10 +11,10 @@ var res = {
 };
 var next = function() {};
 
-var noop = function(name, error) {
+var noop = function(name, except, error) {
   return function(req, res, next) {
-    if (error) throw error;
-    next();
+    if (except) throw except;
+    next(error);
     return name;
   };
 };
@@ -485,6 +485,117 @@ describe("Router usage", function() {
         assert.equal('Has error', err.message);
       });
       console.error = _error;
+      done();
+    });
+  });
+
+  describe("logic or test", function() {
+    it("logic or last one passed", function(done) {
+      router = Router(server, {
+        user: {
+          detail: [
+            [
+              noop('logic-or-1', null, Error('Not allowed')),
+              noop('logic-or-2', null, Error('Not allowed')),
+              noop('logic-or-3')
+            ]
+          ]
+        }
+      });
+      router.get('/users/:id', 'user#detail');
+      var ret = queue.shift();
+      assert.equal('/users/:id', ret[0], 'path check');
+      assert.ok(ret[1] instanceof Array);
+      assert.equal(1, ret[1].length);
+      assert.ok(ret[1][0] instanceof Function);
+      assert.equal('GET', ret[2], 'verb check');
+
+      ret[1][0](req, res, function(error) {
+        assert.equal(undefined, error);
+      });
+
+      done();
+    });
+
+    it("logic or no passed", function(done) {
+      router = Router(server, {
+        user: {
+          detail: [
+            [
+              noop('logic-or-1', null, Error('Not allowed 1')),
+              noop('logic-or-2', null, Error('Not allowed 2')),
+              noop('logic-or-3', null, Error('Not allowed 3'))
+            ]
+          ]
+        }
+      });
+      router.get('/users/:id', 'user#detail');
+      var ret = queue.shift();
+      assert.equal('/users/:id', ret[0], 'path check');
+      assert.ok(ret[1] instanceof Array);
+      assert.equal(1, ret[1].length);
+      assert.ok(ret[1][0] instanceof Function);
+      assert.equal('GET', ret[2], 'verb check');
+
+      ret[1][0](req, res, function(error) {
+        assert.equal('Not allowed 1', error.message);
+        assert.ok(error instanceof Error);
+      });
+
+      done();
+    });
+
+    it("logic or first passed", function(done) {
+      router = Router(server, {
+        user: {
+          detail: [
+            [
+              noop('logic-or-1'),
+              noop('logic-or-2', null, Error('Not allowed 2')),
+              noop('logic-or-3', null, Error('Not allowed 3'))
+            ]
+          ]
+        }
+      });
+      router.get('/users/:id', 'user#detail');
+      var ret = queue.shift();
+      assert.equal('/users/:id', ret[0], 'path check');
+      assert.ok(ret[1] instanceof Array);
+      assert.equal(1, ret[1].length);
+      assert.ok(ret[1][0] instanceof Function);
+      assert.equal('GET', ret[2], 'verb check');
+
+      ret[1][0](req, res, function(error) {
+        assert.equal(undefined, error);
+      });
+
+      done();
+    });
+
+    it("logic or 2th passed", function(done) {
+      router = Router(server, {
+        user: {
+          detail: [
+            [
+              noop('logic-or-1', null, Error('Not allowed 1')),
+              noop('logic-or-2'),
+              noop('logic-or-3', null, Error('Not allowed 3'))
+            ]
+          ]
+        }
+      });
+      router.get('/users/:id', 'user#detail');
+      var ret = queue.shift();
+      assert.equal('/users/:id', ret[0], 'path check');
+      assert.ok(ret[1] instanceof Array);
+      assert.equal(1, ret[1].length);
+      assert.ok(ret[1][0] instanceof Function);
+      assert.equal('GET', ret[2], 'verb check');
+
+      ret[1][0](req, res, function(error) {
+        assert.equal(undefined, error);
+      });
+
       done();
     });
   });
