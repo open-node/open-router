@@ -70,6 +70,14 @@ var defaults = {
   add:    function(ctl) { return noop('defaults-' + ctl + '-add'); }
 };
 
+var banConsoleError = function() {
+  _error = console.error
+  console.error = function() {};
+  return function() {
+    console.error = _error;
+  };
+};
+
 var router = Router(server, ctls);
 
 describe("Router usage", function() {
@@ -479,12 +487,11 @@ describe("Router usage", function() {
       assert.equal('/user/:id', ret[0], 'path check');
       assert.ok(ret[1][0] instanceof Function);
       assert.equal('GET', ret[2], 'path check');
-      _error = console.error
-      console.error = function() {};
+      rollback = banConsoleError();
       var fnName = ret[1][0](req, res, function(err) {
         assert.equal('Has error', err.message);
       });
-      console.error = _error;
+      rollback();
       done();
     });
   });
@@ -595,6 +602,36 @@ describe("Router usage", function() {
       ret[1][0](req, res, function(error) {
         assert.equal(undefined, error);
       });
+
+      done();
+    });
+
+    it("logic or exec exceptions", function(done) {
+      router = Router(server, {
+        user: {
+          detail: [
+            [
+              noop('logic-or-1', null, Error('Not allowed 1')),
+              noop('logic-or-2', Error('Has exception')),
+              noop('logic-or-3', null, Error('Not allowed 3'))
+            ]
+          ]
+        }
+      });
+      router.get('/users/:id', 'user#detail');
+      var ret = queue.shift();
+      assert.equal('/users/:id', ret[0], 'path check');
+      assert.ok(ret[1] instanceof Array);
+      assert.equal(1, ret[1].length);
+      assert.ok(ret[1][0] instanceof Function);
+      assert.equal('GET', ret[2], 'verb check');
+
+      rollback = banConsoleError();
+      ret[1][0](req, res, function(error) {
+        assert.equal('Has exception', error.message);
+        assert.ok(error instanceof Error);
+      });
+      rollback();
 
       done();
     });
