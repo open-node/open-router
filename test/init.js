@@ -48,6 +48,15 @@ describe("Router init", function() {
       done();
     });
 
+    it("controller type error", function(done) {
+      assert.throws(function() {
+        Router(server, {user: 'hello'});
+      }, function(err) {
+        return err instanceof Error && err.message === 'Argument `ctls` validate error, controller must be a object';
+      });
+      done();
+    });
+
     it("chainning type error", function(done) {
       assert.throws(function() {
         Router.server(server).ctls('hello').exec();
