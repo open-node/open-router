@@ -39,7 +39,7 @@ module.exports = delegate(Router, [{
   validate: {
     check: function(value) {
       _.each(value, function(methods, name) {
-        if (!_.isString(name)) throw Error('Argument `ctls` validate error, controller name must be a string');
+        if (!_.isString(name)) throw Error('Argument `defaults` validate error, controller name must be a string');
         if (DEFAULT_METHODS.indexOf(name) === -1) {
           throw Error('defaults only need ' + DEFAULT_METHODS.join(', '));
         }

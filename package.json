@@ -24,7 +24,7 @@
   "homepage": "https://github.com/open-node/open-router#readme",
   "dependencies": {
     "async": "^2.0.1",
-    "func-delegate": "^0.2.1",
+    "func-delegate": "^0.2.2",
     "restify": "^4.1.1",
     "underscore": "^1.8.3"
   },
