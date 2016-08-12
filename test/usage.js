@@ -11,8 +11,9 @@ var res = {
 };
 var next = function() {};
 
-var noop = function(name) {
+var noop = function(name, error) {
   return function(req, res, next) {
+    if (error) throw error;
     next();
     return name;
   };
@@ -60,6 +61,14 @@ server.put = checker('PUT');
 server.patch = checker('PATCH');
 server.del = checker('DELETE');
 server.post = checker('POST');
+
+var defaults = {
+  list:   function(ctl) { return noop('defaults-' + ctl + '-list'); },
+  detail: function(ctl) { return noop('defaults-' + ctl + '-detail'); },
+  modify: function(ctl) { return noop('defaults-' + ctl + '-modify'); },
+  remove: function(ctl) { return noop('defaults-' + ctl + '-remove'); },
+  add:    function(ctl) { return noop('defaults-' + ctl + '-add'); }
+};
 
 var router = Router(server, ctls);
 
@@ -378,4 +387,106 @@ describe("Router usage", function() {
       done();
     });
   });
+
+  describe("defaults controller", function() {
+    it("user defaults collection", function(done) {
+      router = Router(server, ctls, defaults);
+      router.collection('book');
+
+      var ret = queue.shift();
+      assert.equal('/books', ret[0], 'path check');
+      assert.equal('defaults-book-list', ret[1][0](req, res, next), 'method check');
+      assert.equal('GET', ret[2], 'verb check');
+
+      var ret = queue.shift();
+      assert.equal('/books', ret[0], 'path check');
+      assert.equal('defaults-book-add', ret[1][0](req, res, next), 'method check');
+      assert.equal('POST', ret[2], 'verb check');
+
+      done();
+    });
+
+    it("user defaults model", function(done) {
+      router = Router(server, ctls, defaults);
+      router.model('book');
+
+      var ret = queue.shift();
+      assert.equal('/books/:id', ret[0], 'path check');
+      assert.equal('defaults-book-detail', ret[1][0](req, res, next), 'method check');
+      assert.equal('GET', ret[2], 'verb check');
+
+      var ret = queue.shift();
+      assert.equal('/books/:id', ret[0], 'path check');
+      assert.equal('defaults-book-modify', ret[1][0](req, res, next), 'method check');
+      assert.equal('PUT', ret[2], 'verb check');
+
+      var ret = queue.shift();
+      assert.equal('/books/:id', ret[0], 'path check');
+      assert.equal('defaults-book-modify', ret[1][0](req, res, next), 'method check');
+      assert.equal('PATCH', ret[2], 'verb check');
+
+      var ret = queue.shift();
+      assert.equal('/books/:id', ret[0], 'path check');
+      assert.equal('defaults-book-remove', ret[1][0](req, res, next), 'method check');
+      assert.equal('DELETE', ret[2], 'verb check');
+
+      done();
+    });
+
+  });
+
+  describe("router regist exceptions", function() {
+    router = Router(server, ctls);
+    it("action non-exists", function(done) {
+      assert.throws(function() {
+        router.post('/books/:bookId/order', 'book#buy');
+      }, function(err) {
+        return err instanceof Error && err.message === 'Missing controller method:book#buy'
+      });
+      queue.shift();
+
+      done();
+    });
+  });
+
+  describe("apis defined", function() {
+    it("check apis", function(done) {
+      router = Router(server, ctls, null, {apis: '/_apis'});
+      var ret = queue.shift();
+      router.resource('user');
+      var send = function(apis) {
+        assert.ok(apis instanceof Array);
+        assert.equal(6, apis.length);
+      };
+      assert.equal('/_apis', ret[0], 'path check');
+      assert.ok(ret[1][0] instanceof Function);
+      ret[1][0](req, {send: send}, next);
+      assert.equal('GET', ret[2], 'verb check');
+      queue = [];
+      done();
+    });
+  });
+
+  describe("function exec exception", function() {
+    it("check throw Errror", function(done) {
+      router = Router(server, {
+        user: {
+          detail: noop('user-detail', Error('Has error'))
+        }
+      });
+      router.get('/user/:id', 'user#detail')
+      var ret = queue.shift();
+      assert.equal('/user/:id', ret[0], 'path check');
+      assert.ok(ret[1][0] instanceof Function);
+      assert.equal('GET', ret[2], 'path check');
+      _error = console.error
+      console.error = function() {};
+      var fnName = ret[1][0](req, res, function(err) {
+        assert.equal('Has error', err.message);
+      });
+      console.error = _error;
+      done();
+    });
+  });
+
 });

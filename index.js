@@ -51,6 +51,7 @@ module.exports = delegate(Router, [{
           if (!_.isFunction(methods)) throw Error('Argument `defaults` validate error, controller method must be an Array or a Function');
         }
       });
+      return true;
     }
   }
 }, {
