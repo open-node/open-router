@@ -17,6 +17,7 @@ var ctls = {
 var server = restify.createServer();
 
 describe("Router init", function() {
+
   describe("Argument server error", function() {
     it("type error", function(done) {
       assert.throws(function() {
@@ -160,5 +161,34 @@ describe("Router init", function() {
     });
   });
 
-});
+  describe("Argument ctls logic or error", function() {
+    it("type error", function(done) {
+      assert.throws(function() {
+        Router.server(server).ctls({
+          user: {
+            detail: [
+              [noop, noop, 'hello']
+            ]
+          }
+        }).exec();
+      }, function(err) {
+        return err instanceof Error && err.message === 'Argument `ctls` validate error, controller method must be an Array or a Function'
+      });
+      done();
+    });
+  });
 
+  describe("Argument defaults type error in array", function() {
+    it("type error", function(done) {
+      assert.throws(function() {
+        Router.server(server).ctls({user: ctls}).defaults({
+          detail: [noop, noop, 'hello']
+        }).exec();
+      }, function(err) {
+        return err instanceof Error && err.message === 'Argument `defaults` validate error, controller method must be an Array or a Function'
+      });
+      done();
+    });
+  });
+
+});
