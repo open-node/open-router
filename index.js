@@ -7,6 +7,29 @@ var DEFAULT_METHODS = ['add', 'list', 'detail', 'remove', 'modify'];
 
 var Server = restify.createServer().constructor;
 
+var controllerChecker = function(ctl, type, names) {
+  var pre = 'Argument `' + type + '` validate error';
+  if (!_.isObject(ctl)) throw Error(pre + ', controller must be a object');
+  message = pre + ', controller method must be an Array or a Function';
+  var typeError = Error(message);
+  var nameError = Error(pre + ', controller name must be a string');
+  var nameNotAllowError = names && Error(type + ' only need ' + names.join(', '));
+  _.each(ctl, function(methods, name) {
+    if (!_.isString(name)) throw nameError;
+    if (names && names.indexOf(name) === -1) throw nameNotAllowError;
+    if (!_.isArray(methods) && !_.isFunction(methods)) throw typeError;
+    if (_.isFunction(methods)) return;
+    _.each(methods, function(method) {
+      // logic or
+      if (!_.isArray(method) && !_.isFunction(method)) throw typeError;
+      if (_.isFunction(method)) return;
+      _.each(method, function(_or) {
+        if (!_.isFunction(_or)) throw typeError;
+      });
+    });
+  });
+};
+
 module.exports = delegate(Router, [{
   name: 'server',
   type: Server,
@@ -17,24 +40,10 @@ module.exports = delegate(Router, [{
   validate: {
     check: function(values) {
       _.each(values, function(ctl, key) {
-        if (!_.isString(key)) throw Error('Argument `ctls` must be a hash, key is string ' + key);
-        _.each(ctl, function(methods, name) {
-          if (!_.isString(name)) throw Error('Argument `ctls` validate error, controller name must be a string');
-          if (_.isArray(methods)) {
-            _.each(methods, function(method) {
-              // logic or
-              if (_.isArray(method)) {
-                _.each(method, function(_or) {
-                  if (!_.isFunction(_or)) throw Error('Argument `ctls` validate error, controller method must be an Array or a Function');
-                });
-              } else {
-                if (!_.isFunction(method)) throw Error('Argument `ctls` validate error, controller method must be an Array or a Function');
-              }
-            });
-          } else {
-            if (!_.isFunction(methods)) throw Error('Argument `ctls` validate error, controller method must be an Array or a Function');
-          }
-        });
+        if (!_.isString(key)) {
+          throw Error('Argument `ctls` must be a hash, key is string ' + key);
+        }
+        controllerChecker(ctl, 'ctls');
       });
       return true;
     }
@@ -45,19 +54,7 @@ module.exports = delegate(Router, [{
   allowNull: true,
   validate: {
     check: function(value) {
-      _.each(value, function(methods, name) {
-        if (!_.isString(name)) throw Error('Argument `defaults` validate error, controller name must be a string');
-        if (DEFAULT_METHODS.indexOf(name) === -1) {
-          throw Error('defaults only need ' + DEFAULT_METHODS.join(', '));
-        }
-        if (_.isArray(methods)) {
-          _.each(methods, function(method) {
-            if (!_.isFunction(method)) throw Error('Argument `defaults` validate error, controller method must be an Array or a Function');
-          });
-        } else {
-          if (!_.isFunction(methods)) throw Error('Argument `defaults` validate error, controller method must be an Array or a Function');
-        }
-      });
+      controllerChecker(value, 'defaults', DEFAULT_METHODS);
       return true;
     }
   }
