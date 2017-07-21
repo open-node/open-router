@@ -6,6 +6,9 @@ A router for restify or framework based on restify.
 [![Build status](https://api.travis-ci.org/open-node/open-router.svg?branch=master)](https://travis-ci.org/open-node/open-router)
 [![codecov](https://codecov.io/gh/open-node/open-router/branch/master/graph/badge.svg)](https://codecov.io/gh/open-node/open-router)
 
+## Node version
+<pre> >= 6 </pre>
+
 ## Usage
 <pre>npm install open-router --save</pre>
 
