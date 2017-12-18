@@ -1,6 +1,6 @@
 {
   "name": "open-router",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "restify router",
   "main": "index.js",
   "scripts": {
@@ -25,10 +25,10 @@
   "dependencies": {
     "async": "^2.0.1",
     "func-delegate": "^0.2.2",
-    "restify": "^4.1.1",
     "lodash": "^4.15.0"
   },
   "devDependencies": {
+    "restify": "*",
     "codecov": "^1.0.1",
     "istanbul": "^0.4.4",
     "mocha": "^3.0.2",
